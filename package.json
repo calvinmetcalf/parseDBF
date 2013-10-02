@@ -1,0 +1,29 @@
+{
+  "name": "parseDBF",
+  "version": "0.0.1",
+  "description": "The DBF parsing component of shapefile-js",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/calvinmetcalf/parseDBF.git"
+  },
+  "keywords": [
+    "dbf",
+    "shp"
+  ],
+  "author": "Calvin Metcalf",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/calvinmetcalf/parseDBF/issues"
+  },
+  "devDependencies": {
+    "grunt-mocha-test": "~0.7.0",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.4",
+    "mocha": "~1.13.0",
+    "chai": "~1.8.0"
+  }
+}
