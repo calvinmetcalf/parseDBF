@@ -32,7 +32,7 @@ describe('dbf',function(){
 			done();
 		});
 	});
-  it('should handle spetial charicters',function(done){
+  it('should handle special characters',function(done){
     fs.readFile('./test/data/watershed-specialCharacters.dbf',function(err,data){
       if(err){
         return done(err);
