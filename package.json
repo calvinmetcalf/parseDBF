@@ -4,7 +4,7 @@
   "description": "The DBF parsing component of shapefile-js",
   "main": "index.js",
   "scripts": {
-    "test": "grunt"
+    "test": "jshint index.js && mocha -R spec test/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -20,10 +20,8 @@
     "url": "https://github.com/calvinmetcalf/parseDBF/issues"
   },
   "devDependencies": {
-    "grunt-mocha-test": "~0.7.0",
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.6.4",
-    "mocha": "~1.13.0",
-    "chai": "~1.8.0"
+    "chai": "^2.3.0",
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.5"
   }
 }
