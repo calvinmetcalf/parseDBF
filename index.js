@@ -14,7 +14,7 @@ function dbfRowHeader(buffer){
 	var offset = 32;
 	while(true){
 		out.push({
-			name : String.fromCharCode.apply(this,(new Uint8Array(buffer,offset,10))).replace(/\0|\s+$/g,''),
+			name : String.fromCharCode.apply(this,(new Uint8Array(buffer,offset,11))).replace(/\0|\s+$/g,''),
 			dataType : String.fromCharCode(data.getUint8(offset+11)),
 			len : data.getUint8(offset+16),
 			decimal : data.getUint8(offset+17)
