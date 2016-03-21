@@ -12,6 +12,10 @@ function dbfRowHeader(buffer){
 	var data = new DataView(buffer);
 	var out = [];
 	var offset = 32;
+	var testByte = new Uint8Array(buffer,offset,1);
+	if (testByte[0] === 0) {
+		return out;
+	}
 	while(true){
 		out.push({
 			name : String.fromCharCode.apply(this,(new Uint8Array(buffer,offset,11))).replace(/\0|\s+$/g,''),

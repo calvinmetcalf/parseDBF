@@ -41,4 +41,13 @@ describe('dbf',function(){
       done();
     });
   });
+  it('should handle an empty / null dbf file',function(done){
+    fs.readFile('./test/data/empty.dbf',function(err,data){
+      if(err){
+        return done(err);
+      }
+      dbf(toArrayBuffer(data)).should.deep.equal([{}, {}]);
+      done();
+    });
+  });
 });
