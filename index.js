@@ -1,3 +1,5 @@
+var TextDecoder = require('text-encoding').TextDecoder;
+
 function dbfHeader(buffer) {
   var data = new DataView(buffer);
   var out = {};
@@ -28,9 +30,9 @@ function dbfRowHeader(buffer, headerLen) {
   return out;
 }
 
-function rowFuncs(buffer, offset, len, type) {
+function rowFuncs(buffer, offset, len, type, textDecoder) {
   var data = (new Uint8Array(buffer, offset, len));
-  var textData = String.fromCharCode.apply(this, data).replace(/\0|\s+$/g, '');
+  var textData = textDecoder.decode(data).replace(/\0|\s+$/g, '');
   switch (type) {
   case 'N':
   case 'F':
@@ -45,7 +47,7 @@ function rowFuncs(buffer, offset, len, type) {
   }
 }
 
-function parseRow(buffer, offset, rowHeaders) {
+function parseRow(buffer, offset, rowHeaders, textDecoder) {
   var out = {};
   var i = 0;
   var len = rowHeaders.length;
@@ -53,7 +55,7 @@ function parseRow(buffer, offset, rowHeaders) {
   var header;
   while (i < len) {
     header = rowHeaders[i];
-    field = rowFuncs(buffer, offset, header.len, header.dataType);
+    field = rowFuncs(buffer, offset, header.len, header.dataType, textDecoder);
     offset += header.len;
     if (typeof field !== 'undefined') {
       out[header.name] = field;
@@ -62,7 +64,7 @@ function parseRow(buffer, offset, rowHeaders) {
   }
   return out;
 }
-module.exports = function(buffer) {
+module.exports = function(buffer, encoding) {
   var header = dbfHeader(buffer);
   var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1);
 
@@ -70,8 +72,11 @@ module.exports = function(buffer) {
   var recLen = header.recLen;
   var records = header.records;
   var out = [];
+
+  var textDecoder = new TextDecoder(encoding || 'utf-8');
+
   while (records) {
-    out.push(parseRow(buffer, offset, rowHeaders));
+    out.push(parseRow(buffer, offset, rowHeaders, textDecoder));
     offset += recLen;
     records--;
   }
