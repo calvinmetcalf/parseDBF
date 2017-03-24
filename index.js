@@ -1,25 +1,23 @@
-function dbfHeader(buffer) {
-  var data = new DataView(buffer);
+function dbfHeader(data) {
   var out = {};
-  out.lastUpdated = new Date(data.getUint8(1, true) + 1900, data.getUint8(2, true), data.getUint8(3, true));
-  out.records = data.getUint32(4, true);
-  out.headerLen = data.getUint16(8, true);
-  out.recLen = data.getUint16(10, true);
+  out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
+  out.records = data.readUInt32LE(4);
+  out.headerLen = data.readUInt16LE(8);
+  out.recLen = data.readUInt16LE(10);
   return out;
 }
 
-function dbfRowHeader(buffer, headerLen) {
-  var data = new DataView(buffer);
+function dbfRowHeader(data, headerLen, decoder) {
   var out = [];
   var offset = 32;
   while (offset < headerLen) {
     out.push({
-      name: String.fromCharCode.apply(this, (new Uint8Array(buffer, offset, 11))).replace(/\0|\s+$/g, ''),
-      dataType: String.fromCharCode(data.getUint8(offset + 11)),
-      len: data.getUint8(offset + 16),
-      decimal: data.getUint8(offset + 17)
+      name: decoder(data.slice(offset, offset + 11)),
+      dataType: String.fromCharCode(data.readUInt8(offset + 11)),
+      len: data.readUInt8(offset + 16),
+      decimal: data.readUInt8(offset + 17)
     });
-    if (data.getUint8(offset + 32) === 13) {
+    if (data.readUInt8(offset + 32) === 13) {
       break;
     } else {
       offset += 32;
@@ -28,24 +26,24 @@ function dbfRowHeader(buffer, headerLen) {
   return out;
 }
 
-function rowFuncs(buffer, offset, len, type) {
-  var data = (new Uint8Array(buffer, offset, len));
-  var textData = String.fromCharCode.apply(this, data).replace(/\0|\s+$/g, '');
+function rowFuncs(buffer, offset, len, type, decoder) {
+  var data = buffer.slice(offset, offset + len);
+  var textData = decoder(data);
   switch (type) {
-  case 'N':
-  case 'F':
-  case 'O':
-    return parseFloat(textData, 10);
-  case 'D':
-    return new Date(textData.slice(0, 4), parseInt(textData.slice(4, 6), 10) - 1, textData.slice(6, 8));
-  case 'L':
-    return textData.toLowerCase() === 'y' || textData.toLowerCase() === 't';
-  default:
-    return textData;
+    case 'N':
+    case 'F':
+    case 'O':
+      return parseFloat(textData, 10);
+    case 'D':
+      return new Date(textData.slice(0, 4), parseInt(textData.slice(4, 6), 10) - 1, textData.slice(6, 8));
+    case 'L':
+      return textData.toLowerCase() === 'y' || textData.toLowerCase() === 't';
+    default:
+      return textData;
   }
 }
 
-function parseRow(buffer, offset, rowHeaders) {
+function parseRow(buffer, offset, rowHeaders, decoder) {
   var out = {};
   var i = 0;
   var len = rowHeaders.length;
@@ -53,7 +51,7 @@ function parseRow(buffer, offset, rowHeaders) {
   var header;
   while (i < len) {
     header = rowHeaders[i];
-    field = rowFuncs(buffer, offset, header.len, header.dataType);
+    field = rowFuncs(buffer, offset, header.len, header.dataType, decoder);
     offset += header.len;
     if (typeof field !== 'undefined') {
       out[header.name] = field;
@@ -62,16 +60,27 @@ function parseRow(buffer, offset, rowHeaders) {
   }
   return out;
 }
-module.exports = function(buffer) {
+function defaultDecoder(data) {
+  return String.fromCharCode.apply(this, data).replace(/\0/g, '').trim();
+}
+function createDecoder(encoding) {
+  if (!encoding) {
+    return defaultDecoder;
+  }
+  console.log('not supported yet');
+  return defaultDecoder;
+}
+module.exports = function(buffer, encoding) {
+  var decoder = createDecoder(encoding);
   var header = dbfHeader(buffer);
-  var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1);
+  var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1, decoder);
 
   var offset = ((rowHeaders.length + 1) << 5) + 2;
   var recLen = header.recLen;
   var records = header.records;
   var out = [];
   while (records) {
-    out.push(parseRow(buffer, offset, rowHeaders));
+    out.push(parseRow(buffer, offset, rowHeaders, decoder));
     offset += recLen;
     records--;
   }
