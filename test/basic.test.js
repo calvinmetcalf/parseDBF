@@ -2,7 +2,7 @@ var fs = require('fs');
 var basic = require('./data/watershed');
 var char11 = require('./data/watershed-11chars');
 var specialChar = require('./data/watershed-specialCharacters');
-
+var utf = require('./data/utf.json');
 var dbf = require('../');
 require('chai').should();
 function toArrayBuffer(buffer) {
@@ -14,7 +14,7 @@ describe('dbf',function(){
 			if(err){
 				return done(err);
 			}
-			dbf(toArrayBuffer(data)).should.deep.equal(basic);
+			dbf(data).should.deep.equal(basic);
 			done();
 		});
 	});
@@ -23,7 +23,7 @@ describe('dbf',function(){
 			if(err){
 				return done(err);
 			}
-			dbf(toArrayBuffer(data)).should.deep.equal(char11);
+			dbf(data).should.deep.equal(char11);
 			done();
 		});
 	});
@@ -32,7 +32,7 @@ describe('dbf',function(){
       if(err){
         return done(err);
       }
-      dbf(toArrayBuffer(data)).should.deep.equal(specialChar);
+      dbf(data).should.deep.equal(specialChar);
       done();
     });
   });
@@ -41,7 +41,27 @@ describe('dbf',function(){
       if(err){
         return done(err);
       }
-      dbf(toArrayBuffer(data)).should.deep.equal([{}, {}]);
+      dbf(data).should.deep.equal([{}, {}]);
+      done();
+    });
+  });
+  it('should handle utf charicters',function(done){
+    fs.readFile('./test/data/utf.dbf',function(err,data){
+      if(err){
+        return done(err);
+      }
+      dbf(data).should.deep.equal(utf);
+      dbf(data, 'UTF-8').should.deep.equal(utf);
+      done();
+    });
+  });
+  it('should handle other charicters',function(done){
+    fs.readFile('./test/data/codepage.dbf',function(err,data){
+      if(err){
+        return done(err);
+      }
+      dbf(data)[1].should.not.deep.equal(utf[1]);
+      dbf(data, '1250')[1].should.deep.equal(utf[1]);
       done();
     });
   });

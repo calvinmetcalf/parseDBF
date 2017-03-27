@@ -1,3 +1,6 @@
+var codepage = require('codepage-encoding');
+var iconv = require('iconv-lite');
+var StringDecoder = require('string_decoder').StringDecoder;
 function dbfHeader(data) {
   var out = {};
   out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
@@ -61,14 +64,26 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
   return out;
 }
 function defaultDecoder(data) {
-  return String.fromCharCode.apply(this, data).replace(/\0/g, '').trim();
+  var decoder = new StringDecoder();
+  var out = decoder.write(data) + decoder.end();
+  return out.replace(/\0/g, '').trim();
 }
-function createDecoder(encoding) {
+function createDecoder(code) {
+  if (!code) {
+    return defaultDecoder;
+  }
+  var encoding = codepage.from(code);
   if (!encoding) {
     return defaultDecoder;
   }
-  console.log('not supported yet');
-  return defaultDecoder;
+  if (!iconv.encodingExists(encoding)) {
+    return defaultDecoder;
+  }
+  return decoder;
+  function decoder(buffer) {
+    var out = iconv.decode(buffer, encoding);
+    return out.replace(/\0/g, '').trim();
+  }
 }
 module.exports = function(buffer, encoding) {
   var decoder = createDecoder(encoding);
