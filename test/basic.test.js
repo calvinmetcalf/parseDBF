@@ -2,7 +2,14 @@ var fs = require('fs');
 var basic = require('./data/watershed');
 var char11 = require('./data/watershed-11chars');
 var specialChar = require('./data/watershed-specialCharacters');
-var utf = require('./data/utf.json');
+var utf = [
+  {
+    field: '💩'
+  },
+  {
+    field: 'Hněvošický háj'
+  }
+]
 var dbf = require('../');
 require('chai').should();
 function toArrayBuffer(buffer) {
