@@ -69,6 +69,8 @@ describe('dbf',function(){
       }
       dbf(data)[1].should.not.deep.equal(utf[1]);
       dbf(data, '1250')[1].should.deep.equal(utf[1]);
+      dbf(data, 'ASNI 1250')[1].should.deep.equal(utf[1]);
+      dbf(data, 'windows-1250')[1].should.deep.equal(utf[1]);
       done();
     });
   });

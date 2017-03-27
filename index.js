@@ -1,4 +1,3 @@
-var codepage = require('codepage-encoding');
 var iconv = require('iconv-lite');
 var StringDecoder = require('string_decoder').StringDecoder;
 function dbfHeader(data) {
@@ -68,16 +67,16 @@ function defaultDecoder(data) {
   var out = decoder.write(data) + decoder.end();
   return out.replace(/\0/g, '').trim();
 }
-function createDecoder(code) {
-  if (!code) {
-    return defaultDecoder;
-  }
-  var encoding = codepage.from(code);
+function createDecoder(encoding) {
   if (!encoding) {
     return defaultDecoder;
   }
   if (!iconv.encodingExists(encoding)) {
-    return defaultDecoder;
+    if (encoding.length > 5 && iconv.encodingExists(encoding.slice(5))) {
+      encoding = encoding.slice(5);
+    } else {
+      return defaultDecoder;
+    }
   }
   return decoder;
   function decoder(buffer) {
