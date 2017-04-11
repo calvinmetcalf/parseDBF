@@ -1,5 +1,4 @@
-var iconv = require('iconv-lite');
-var StringDecoder = require('string_decoder').StringDecoder;
+var createDecoder = require('./decoder');
 function dbfHeader(data) {
   var out = {};
   out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
@@ -62,28 +61,7 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
   }
   return out;
 }
-function defaultDecoder(data) {
-  var decoder = new StringDecoder();
-  var out = decoder.write(data) + decoder.end();
-  return out.replace(/\0/g, '').trim();
-}
-function createDecoder(encoding) {
-  if (!encoding) {
-    return defaultDecoder;
-  }
-  if (!iconv.encodingExists(encoding)) {
-    if (encoding.length > 5 && iconv.encodingExists(encoding.slice(5))) {
-      encoding = encoding.slice(5);
-    } else {
-      return defaultDecoder;
-    }
-  }
-  return decoder;
-  function decoder(buffer) {
-    var out = iconv.decode(buffer, encoding);
-    return out.replace(/\0/g, '').trim();
-  }
-}
+
 module.exports = function(buffer, encoding) {
   var decoder = createDecoder(encoding);
   var header = dbfHeader(buffer);

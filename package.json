@@ -24,7 +24,11 @@
     "jshint": "^2.8.0",
     "mocha": "^2.3.3"
   },
+  "browser": {
+    "./decoder.js": "./decoder-browser.js"
+  },
   "dependencies": {
-    "iconv-lite": "^0.4.15"
+    "iconv-lite": "^0.4.15",
+    "text-encoding": "^0.6.4"
   }
 }
