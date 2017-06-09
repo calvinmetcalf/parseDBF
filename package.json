@@ -29,6 +29,6 @@
   },
   "dependencies": {
     "iconv-lite": "^0.4.15",
-    "text-encoding": "^0.6.4"
+    "text-encoding-polyfill": "^0.6.7"
   }
 }

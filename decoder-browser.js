@@ -1,4 +1,4 @@
-require('text-encoding');
+require('text-encoding-polyfill');
 var StringDecoder = require('string_decoder').StringDecoder;
 function defaultDecoder(data) {
   var decoder = new StringDecoder();
