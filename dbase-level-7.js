@@ -1,49 +1,58 @@
 var createDecoder = require('./decoder');
-var parseLevel7 = require('./dbase-level-7')
-
 function dbfHeader(data) {
   var out = {};
-
-  switch(data[0] & 0x07) {
-    case 0x03:
-      out.dBaseVersion = 'level5'
-      break
-    case 0x04:
-      out.dBaseVersion = 'level7'
-      break
-  }
-
   out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
   out.records = data.readUInt32LE(4);
   out.headerLen = data.readUInt16LE(8);
   out.recLen = data.readUInt16LE(10);
-  
   return out;
 }
 
 function dbfRowHeader(data, headerLen, decoder) {
   var out = [];
-  var offset = 32;
+  var offset = 68;
+
   while (offset < headerLen) {
-    out.push({
-      name: decoder(data.slice(offset, offset + 11)),
-      dataType: String.fromCharCode(data.readUInt8(offset + 11)),
-      len: data.readUInt8(offset + 16),
-      decimal: data.readUInt8(offset + 17)
-    });
-    if (data.readUInt8(offset + 32) === 13) {
+    var columna = {
+      name: decoder(data.slice(offset, offset + 32)),
+      dataType: String.fromCharCode(data.readUInt8(offset + 32)),
+      len: data.readUInt8(offset + 33),
+      decimal: data.readUInt8(offset + 34),
+      mdx: data.readUInt8(offset + 37) == 0x01,
+      autoInc: data.readUInt32LE(offset + 40)
+    }
+    
+    out.push(columna);
+
+    if (data.readUInt8(offset + 30) === 13) {
       break;
     } else {
-      offset += 32;
+      offset += 48;
     }
   }
   return out;
 }
 
-function rowFuncs(buffer, offset, len, type, decoder) {
+function rowFuncs(buffer, offset, len, type, decoder) {  
   var data = buffer.slice(offset, offset + len);
+  
+
   var textData = decoder(data);
+
+  console.log('textData', textData, type, offset, len)
+
   switch (type) {
+    case '+':
+
+      var negative = (data[0] & 0x80) == 0x00
+      var lastPart = (data[0] & 0x7F)
+      
+      var buffer2 = Buffer.alloc(len, data)
+      buffer2[0] = lastPart
+
+      return buffer2.readUInt32BE(0)
+
+
     case 'N':
     case 'F':
     case 'O':
@@ -63,7 +72,13 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
   var len = rowHeaders.length;
   var field;
   var header;
+  var deleted;
+  deleted = buffer.readUInt8(offset) == 0x2A
+  offset++
+  out['@deleted'] = deleted
+  
   while (i < len) {
+    
     header = rowHeaders[i];
     field = rowFuncs(buffer, offset, header.len, header.dataType, decoder);
     offset += header.len;
@@ -72,6 +87,7 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
     }
     i++;
   }
+
   return out;
 }
 
@@ -79,20 +95,16 @@ module.exports = function(buffer, encoding) {
   var decoder = createDecoder(encoding);
   var header = dbfHeader(buffer);
 
-  if (header.dBaseVersion === 'level7') {
-    return parseLevel7.apply(this, arguments)
-  }
-
   var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1, decoder);
 
-  var offset = ((rowHeaders.length + 1) << 5) + 2;
+  var offset = header.headerLen//((rowHeaders.length + 1) << 5) + 2;
   var recLen = header.recLen;
   var records = header.records;
   var out = [];
-  while (records) {
+
+  for (var i = 0; i < records; i++, offset += recLen) {
     out.push(parseRow(buffer, offset, rowHeaders, decoder));
-    offset += recLen;
-    records--;
   }
+  
   return out;
 };
