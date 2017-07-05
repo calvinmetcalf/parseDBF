@@ -39,7 +39,7 @@ function rowFuncs(buffer, offset, len, type, decoder) {
 
   var textData = decoder(data);
 
-  console.log('textData', textData, type, offset, len)
+  //console.log('textData', textData, type, offset, len)
 
   switch (type) {
     case '+':
