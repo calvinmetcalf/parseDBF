@@ -1,21 +1,8 @@
 var createDecoder = require('./decoder');
 var parseLevel7 = require('./dbase-level-7')
-var parseVisualFoxpro = require('./visual-foxpro')
 
 function dbfHeader(data) {
   var out = {};
-
-  switch(data[0]) {
-    case 0x03:
-      out.dBaseVersion = 'level5'
-      break
-    case 0x04:
-      out.dBaseVersion = 'level7'
-      break
-    case 0x30:
-      out.dBaseVersion = 'visual_foxpro'
-      break
-  }
 
   out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
   out.records = data.readUInt32LE(4);
@@ -56,6 +43,8 @@ function rowFuncs(buffer, offset, len, type, decoder) {
       return new Date(textData.slice(0, 4), parseInt(textData.slice(4, 6), 10) - 1, textData.slice(6, 8));
     case 'L':
       return textData.toLowerCase() === 'y' || textData.toLowerCase() === 't';
+    case 'Y':
+      return data.readUIntLE(0, 8) / 10000
     default:
       return textData;
   }
@@ -67,6 +56,9 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
   var len = rowHeaders.length;
   var field;
   var header;
+  deleted = buffer.readUInt8(offset) == 0x2A
+  offset++
+  out['@deleted'] = deleted
   while (i < len) {
     header = rowHeaders[i];
     field = rowFuncs(buffer, offset, header.len, header.dataType, decoder);
@@ -82,16 +74,10 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
 module.exports = function(buffer, encoding) {
   var decoder = createDecoder(encoding);
   var header = dbfHeader(buffer);
-  
-  switch(header.dBaseVersion) {
-    case 'level7':
-      return parseLevel7.apply(this, arguments)
-    case 'visual_foxpro':
-      return parseVisualFoxpro.apply(this, arguments)
-  }
 
-  var decoder = createDecoder(encoding);
-  var header = dbfHeader(buffer);
+  if (header.dBaseVersion === 'level7') {
+    return parseLevel7.apply(this, arguments)
+  }
 
   var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1, decoder);
 
@@ -103,6 +89,6 @@ module.exports = function(buffer, encoding) {
   for (var i = 0; i < records; i++, offset += recLen) {
     out.push(parseRow(buffer, offset, rowHeaders, decoder));
   }
-  
+
   return out;
 };
