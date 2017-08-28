@@ -76,5 +76,9 @@ module.exports = function(buffer, encoding) {
     offset += recLen;
     records--;
   }
-  return out;
+  return {
+    out,
+    header,
+    rowHeaders
+  }
 };
