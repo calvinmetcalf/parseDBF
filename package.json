@@ -4,7 +4,7 @@
   "description": "The DBF parsing component of shapefile-js",
   "main": "index.js",
   "scripts": {
-    "build-test": "browserify -t brfs ./test/basic.test.js > ./test/bundle.js",
+    "test-browser": "budo test/basic.test.js --serve test/bundle.js --open --live -- -t brfs",
     "test": "jshint index.js && mocha -R spec test/*.test.js"
   },
   "repository": {
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "brfs": "^1.4.3",
-    "browserify": "^15.0.0",
+    "budo": "^10.0.4",
     "chai": "^4.1.2",
     "jshint": "^2.9.5",
     "mocha": "^4.1.0"
