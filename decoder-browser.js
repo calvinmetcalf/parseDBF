@@ -12,7 +12,7 @@ function createDecoder(encoding) {
   if (!encoding) {
     return defaultDecoder;
   }
-  enconding = String(encoding).trim();
+  encoding = String(encoding).trim();
   var match = regex.exec(encoding);
   if (match) {
     encoding = 'windows-' + match[1];

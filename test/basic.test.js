@@ -80,9 +80,7 @@ describe('dbf',function(){
       if(err){
         return done(err);
       }
-      // throws if calling data.trim()
       dbf(data, data).should.deep.equal(basic);
-      // throws RangeError if using TextDecoder(htmlpage)
       dbf(data, htmlpage).should.deep.equal(basic);
       done();
     });
