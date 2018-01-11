@@ -25,7 +25,7 @@
     "budo": "^10.0.4",
     "chai": "^4.1.2",
     "jshint": "^2.9.5",
-    "mocha": "^4.1.0"
+    "mocha": "^3.5.3"
   },
   "dependencies": {
     "iconv-lite": "^0.4.19",
