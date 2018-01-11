@@ -6,18 +6,22 @@ function defaultDecoder(data) {
   return out.replace(/\0/g, '').trim();
 }
 module.exports = createDecoder;
-var regex = /^(?:ASNI\s)?(\d+)$/m;
+var regex = /^(?:ANSI\s)?(\d+)$/m;
+
 function createDecoder(encoding) {
   if (!encoding) {
     return defaultDecoder;
   }
+  encoding = String(encoding).trim();
+  var match = regex.exec(encoding);
+  if (match) {
+    encoding = 'windows-' + match[1];
+  }
   try {
-    new TextDecoder(encoding.trim());
+    new TextDecoder(encoding);
+    return browserDecoder;
   } catch(e) {
-    var match = regex.exec(encoding);
-    if (match) {
-      encoding = 'windows-' + match[1];
-    }
+    return defaultDecoder;
   }
   return browserDecoder;
   function browserDecoder(buffer) {

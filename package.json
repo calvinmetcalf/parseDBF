@@ -4,6 +4,7 @@
   "description": "The DBF parsing component of shapefile-js",
   "main": "index.js",
   "scripts": {
+    "test-browser": "budo test/basic.test.js --serve test/bundle.js --open --live -- -t brfs",
     "test": "jshint index.js && mocha -R spec test/*.test.js"
   },
   "repository": {
@@ -20,15 +21,17 @@
     "url": "https://github.com/calvinmetcalf/parseDBF/issues"
   },
   "devDependencies": {
-    "chai": "^3.3.0",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.3"
+    "brfs": "^1.4.3",
+    "budo": "^10.0.4",
+    "chai": "^4.1.2",
+    "jshint": "^2.9.5",
+    "mocha": "^3.5.3"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.4.19",
+    "text-encoding-polyfill": "^0.6.7"
   },
   "browser": {
     "./decoder.js": "./decoder-browser.js"
-  },
-  "dependencies": {
-    "iconv-lite": "^0.4.15",
-    "text-encoding-polyfill": "^0.6.7"
   }
 }
