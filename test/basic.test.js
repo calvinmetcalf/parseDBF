@@ -75,7 +75,7 @@ describe('dbf',function(){
     });
   });
   it('should handle invalid encodings',function(done){
-    var htmlpage = fs.readFileSync('./test/index.html', 'utf-8');
+    var htmlpage = fs.readFileSync('./index.html', 'utf-8');
     fs.readFile('./test/data/watershed.dbf',function(err,data){
       if(err){
         return done(err);

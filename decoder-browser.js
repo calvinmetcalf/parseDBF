@@ -1,5 +1,4 @@
 require('text-encoding-polyfill');
-var iconv = require('iconv-lite');
 var StringDecoder = require('string_decoder').StringDecoder;
 function defaultDecoder(data) {
   var decoder = new StringDecoder();
@@ -17,13 +16,6 @@ function createDecoder(encoding) {
   var match = regex.exec(encoding);
   if (match) {
     encoding = 'windows-' + match[1];
-  }
-  if (!iconv.encodingExists(encoding)) {
-    if (encoding.length > 5 && iconv.encodingExists(encoding.slice(5))) {
-      encoding = encoding.slice(5);
-    } else {
-      return defaultDecoder;
-    }
   }
   try {
     new TextDecoder(encoding);
