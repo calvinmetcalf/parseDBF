@@ -62,6 +62,17 @@ describe('dbf',function(){
       done();
     });
   });
+  it('should handle utf charicters and a stupid formatting',function(done){
+    fs.readFile('./test/data/utf.dbf',function(err,data){
+      if(err){
+        return done(err);
+      }
+      fs.readFile('./test/data/page.html', 'utf8',function(err,data2){
+        dbf(data, data2).should.deep.equal(utf);
+        done();
+      })
+    });
+  });
   it('should handle other charicters',function(done){
     fs.readFile('./test/data/codepage.dbf',function(err,data){
       if(err){

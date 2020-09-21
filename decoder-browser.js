@@ -7,7 +7,7 @@ function defaultDecoder(data) {
 }
 module.exports = createDecoder;
 var regex = /^(?:ASNI\s)?(\d+)$/m;
-function createDecoder(encoding) {
+function createDecoder(encoding, second) {
   if (!encoding) {
     return defaultDecoder;
   }
@@ -15,8 +15,10 @@ function createDecoder(encoding) {
     new TextDecoder(encoding.trim());
   } catch(e) {
     var match = regex.exec(encoding);
-    if (match) {
-      encoding = 'windows-' + match[1];
+    if (match && !second) {
+      return createDecoder('windows-' + match[1], true);
+    } else {
+      return defaultDecoder;
     }
   }
   return browserDecoder;
