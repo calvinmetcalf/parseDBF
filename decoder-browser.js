@@ -6,7 +6,7 @@ function defaultDecoder(data) {
   return out.replace(/\0/g, '').trim();
 }
 module.exports = createDecoder;
-var regex = /^(?:ASNI\s)?(\d+)$/m;
+var regex = /^(?:ANSI\s)?(\d+)$/m;
 function createDecoder(encoding, second) {
   if (!encoding) {
     return defaultDecoder;
