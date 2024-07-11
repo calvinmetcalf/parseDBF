@@ -1,6 +1,6 @@
 {
   "name": "parsedbf",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "The DBF parsing component of shapefile-js",
   "main": "index.js",
   "type": "module",
