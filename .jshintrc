@@ -6,5 +6,6 @@
   "unused": true,
   "trailing": true,
   "browser": true,
-  "node": true
+  "node": true,
+  "esversion": 6
 }

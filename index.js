@@ -1,10 +1,10 @@
-var createDecoder = require('./decoder');
+import { createDecoder } from './decoder.js';
 function dbfHeader(data) {
   var out = {};
-  out.lastUpdated = new Date(data.readUInt8(1) + 1900, data.readUInt8(2), data.readUInt8(3));
-  out.records = data.readUInt32LE(4);
-  out.headerLen = data.readUInt16LE(8);
-  out.recLen = data.readUInt16LE(10);
+  out.lastUpdated = new Date(data.getUint8(1) + 1900, data.getUint8(2), data.getUint8(3));
+  out.records = data.getUint32(4, true);
+  out.headerLen = data.getUint16(8, true);
+  out.recLen = data.getUint16(10, true);
   return out;
 }
 
@@ -13,12 +13,12 @@ function dbfRowHeader(data, headerLen, decoder) {
   var offset = 32;
   while (offset < headerLen) {
     out.push({
-      name: decoder(data.slice(offset, offset + 11)),
-      dataType: String.fromCharCode(data.readUInt8(offset + 11)),
-      len: data.readUInt8(offset + 16),
-      decimal: data.readUInt8(offset + 17)
+      name: decoder(new Uint8Array(data.buffer.slice(data.byteOffset + offset, data.byteOffset + offset + 11))),
+      dataType: String.fromCharCode(data.getUint8(offset + 11)),
+      len: data.getUint8(offset + 16),
+      decimal: data.getUint8(offset + 17)
     });
-    if (data.readUInt8(offset + 32) === 13) {
+    if (data.getUint8(offset + 32) === 13) {
       break;
     } else {
       offset += 32;
@@ -28,7 +28,8 @@ function dbfRowHeader(data, headerLen, decoder) {
 }
 
 function rowFuncs(buffer, offset, len, type, decoder) {
-  var data = buffer.slice(offset, offset + len);
+  const data = new Uint8Array(buffer.buffer.slice(buffer.byteOffset + offset, buffer.byteOffset + offset + len));
+
   var textData = decoder(data);
   switch (type) {
     case 'N':
@@ -62,7 +63,7 @@ function parseRow(buffer, offset, rowHeaders, decoder) {
   return out;
 }
 
-module.exports = function(buffer, encoding) {
+export default function (buffer, encoding) {
   var decoder = createDecoder(encoding);
   var header = dbfHeader(buffer);
   var rowHeaders = dbfRowHeader(buffer, header.headerLen - 1, decoder);
@@ -77,4 +78,4 @@ module.exports = function(buffer, encoding) {
     records--;
   }
   return out;
-};
+}

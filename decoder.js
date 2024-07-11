@@ -1,25 +1,25 @@
-var iconv = require('iconv-lite');
-var StringDecoder = require('string_decoder').StringDecoder;
-function defaultDecoder(data) {
-  var decoder = new StringDecoder();
-  var out = decoder.write(data) + decoder.end();
-  return out.replace(/\0/g, '').trim();
-}
-module.exports = createDecoder;
-function createDecoder(encoding) {
+var regex = /^(?:ANSI\s)?(\d+)$/m;
+export function createDecoder(encoding, second) {
   if (!encoding) {
-    return defaultDecoder;
+    return browserDecoder;
   }
-  if (!iconv.encodingExists(encoding)) {
-    if (encoding.length > 5 && iconv.encodingExists(encoding.slice(5))) {
-      encoding = encoding.slice(5);
+  try {
+    new TextDecoder(encoding.trim());
+  } catch (e) {
+    var match = regex.exec(encoding);
+    if (match && !second) {
+      return createDecoder('windows-' + match[1], true);
     } else {
-      return defaultDecoder;
+      encoding = undefined;
+      return browserDecoder;
     }
   }
-  return decoder;
-  function decoder(buffer) {
-    var out = iconv.decode(buffer, encoding);
+  return browserDecoder;
+  function browserDecoder(buffer) {
+    var decoder = new TextDecoder(encoding ? encoding : undefined);
+    var out = decoder.decode(buffer, {
+      stream: true
+    }) + decoder.decode();
     return out.replace(/\0/g, '').trim();
   }
 }

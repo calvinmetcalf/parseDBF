@@ -17,11 +17,12 @@ npm install --save parsedbf
 Usage
 ===
 
-`parseDBF(buffer, [codepage])`
+`parseDBF(dataView, [codepage])`
 
 ```js
-var parseDBF = require('parsedbf');
+import parseDBF from 'parsedbf';
 
-var dbfFile = fs.readFileSync('path/to/my/file');
+var buff = fs.readFileSync('path/to/my/file');
+var dbfFile = new DataView(buff.buffer, buff.byteOffset, buff.byteLength);
 var parsedDBF = parseDBF(dbfFile);
 ```
