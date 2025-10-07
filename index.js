@@ -37,7 +37,7 @@ function rowFuncs(buffer, offset, len, type, decoder) {
     case 'O':
       return parseFloat(textData, 10);
     case 'D':
-      return new Date(textData.slice(0, 4), parseInt(textData.slice(4, 6), 10) - 1, textData.slice(6, 8));
+      return textData === "" ? "" : new Date(textData.slice(0, 4), parseInt(textData.slice(4, 6), 10) - 1, textData.slice(6, 8));
     case 'L':
       return textData.toLowerCase() === 'y' || textData.toLowerCase() === 't';
     default:
